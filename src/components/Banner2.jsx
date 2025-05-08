@@ -13,7 +13,7 @@ const displayDetails = [
     reverse: false,
     backgroundColor: 'bg-purple-200',
     link: "/Productdetails/7",
-    reducedImage: true, // Custom flag for reduced image size
+    reducedImage: true, 
   },
   {
     image: "https://fakestoreapi.com/img/81Zt42ioCgL._AC_SX679_.jpg",

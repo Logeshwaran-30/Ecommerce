@@ -78,7 +78,7 @@ const Productcard2 = () => {
             className="w-[100px] h-[100px] sm:w-[300px] sm:h-[300px] border rounded-md border-neutral-200"
             width="300"
             height="300"
-            src="../public/emptycart.svg" // Ensure this path is correct or adjust if needed
+            src="/emptycart.svg"       
             alt="emptycart"
           />
           <div>
