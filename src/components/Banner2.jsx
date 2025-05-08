@@ -10,7 +10,6 @@ const rawDetails = [
     title: "WHITE GOLD PLATED PRINCESS",
     subtitle: 'Be inspired',
     description: "Classic Created Wedding Engagement Solitaire Diamond Promise Ring.",
-    buttonText: 'Order now',
     reverse: false,
     backgroundColor: 'bg-purple-200',
     reducedImage: true,
@@ -32,16 +31,11 @@ const rawDetails = [
     title: "LOCK AND LOVE LEATHER JACKET",
     subtitle: 'New collection',
     description: "Stylish faux leather jacket with removable hood and 2 pockets.",
-    buttonText: 'Order now',
     reverse: false,
     backgroundColor: 'bg-negative-200',
   },
 ];
 
-const displayDetails = rawDetails.map(item => ({
-  ...item,
-  link: `/Productdetails/${item.id}`,
-}));
 
 
 export default function Banner2() {
