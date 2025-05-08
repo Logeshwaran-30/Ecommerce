@@ -2,9 +2,10 @@ import React from 'react';
 import { SfButton } from '@storefront-ui/react';
 import classNames from 'classnames';
 
-// Data array for display details
-const displayDetails = [
+
+const rawDetails = [
   {
+    id: 7,
     image: "https://fakestoreapi.com/img/71YAIFU48IL._AC_UL640_QL65_ML3_.jpg",
     title: "WHITE GOLD PLATED PRINCESS",
     subtitle: 'Be inspired',
@@ -12,21 +13,21 @@ const displayDetails = [
     buttonText: 'Order now',
     reverse: false,
     backgroundColor: 'bg-purple-200',
-    link: "/Productdetails/7",
-    reducedImage: true, 
+    reducedImage: true,
   },
   {
+    id: 14,
     image: "https://fakestoreapi.com/img/81Zt42ioCgL._AC_SX679_.jpg",
     title: "SAMSUNG 49-INCH CHG90 MONITOR",
     subtitle: 'Gadget',
     description: "49-inch super ultrawide QLED gaming monitor with HDR support.",
     buttonText: 'Order now',
     reverse: true,
-    backgroundColor: 'bg-yellow-200', 
-    link: "/Productdetails/14",
-    center: true, // Custom flag to center this card
+    backgroundColor: 'bg-yellow-200',
+    center: true,
   },
   {
+    id: 16,
     image: "https://fakestoreapi.com/img/81XH0e8fefL._AC_UY879_.jpg",
     title: "LOCK AND LOVE LEATHER JACKET",
     subtitle: 'New collection',
@@ -34,9 +35,14 @@ const displayDetails = [
     buttonText: 'Order now',
     reverse: false,
     backgroundColor: 'bg-negative-200',
-    link: "/Productdetails/16",
   },
 ];
+
+const displayDetails = rawDetails.map(item => ({
+  ...item,
+  link: `/Productdetails/${item.id}`,
+}));
+
 
 export default function Banner2() {
   return (
@@ -63,7 +69,7 @@ export default function Banner2() {
               'relative flex md:max-w-[1536px] md:[&:not(:first-of-type)]:flex-1 md:first-of-type:w-full',
               backgroundColor,
               {
-                'items-center justify-center': center, // Center this card if 'center' is true
+                'items-center justify-center': center, 
               },
             )}
           >
