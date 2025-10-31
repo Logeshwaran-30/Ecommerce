@@ -1,45 +1,53 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+
 const categories = [
-    {
-      title: `Women`,
-      image: 'https://storage.googleapis.com/sfui_docs_artifacts_bucket_public/production/women_category.png',
-      link:'/category/womens-clothing'
-    },
-    {
-      title: `Men`,
-      image: 'https://storage.googleapis.com/sfui_docs_artifacts_bucket_public/production/men_category.png',
-      link:'/category/mens-clothing'
-    },
-    {
-      title: `Jewels`,
-      image:"../circular_jewels.png",
-      link:"/category/jewellery"
-    },
-  ];
-  export default function Categorycard() {
-    return (
-      <div className="flex flex-wrap gap-4 lg:gap-6 lg:flex-no-wrap">
-        {categories.map(({ title, image,link }) => (
-          <div className="relative min-w-[180px] flex-col max-w-[240px] group" key={title}>
-            <a
-              className="absolute w-full h-full z-[1] focus-visible:outline focus-visible:outline-offset focus-visible:rounded-md"
-              href={link}
-              aria-label={title}
-            />
-            <img
-              className="rounded-full bg-neutral-100 group-hover:shadow-xl group-active:shadow-none"
-              src={image}
-              alt={title}
-              width="240"
-              height="240"
-            />
-            <div className="flex justify-center">
-              <a className="mt-4 font-semibold no-underline text-normal-900 typography-text-base group-hover:underline group-hover:text-primary-800 group-hover:font-normal group-active:text-primary-800 group-active:font-normal">
-                {title}
-              </a>
-            </div>
+  {
+    title: 'Women',
+    image:
+      'https://storage.googleapis.com/sfui_docs_artifacts_bucket_public/production/women_category.png',
+  },
+  {
+    title: 'Men',
+    image:
+      'https://storage.googleapis.com/sfui_docs_artifacts_bucket_public/production/men_category.png',
+  },
+  {
+    title: 'Jewels',
+    image: '../circular_jewels.png',
+  },
+];
+
+export default function Categorycard() {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate('/category'); // 👈 always go to /product
+  };
+
+  return (
+    <div className="flex flex-wrap justify-center gap-6 md:gap-10 max-w-[1536px] mx-auto py-6">
+      {categories.map(({ title, image }) => (
+        <div
+          key={title}
+          onClick={handleClick}
+          className="relative flex flex-col items-center w-[140px] sm:w-[180px] md:w-[200px] lg:w-[240px] group cursor-pointer"
+        >
+          {/* ✅ Image */}
+          <img
+            className="rounded-full bg-neutral-100 w-full aspect-square object-cover group-hover:shadow-xl transition-all duration-300"
+            src={image}
+            alt={title}
+          />
+
+          {/* ✅ Title */}
+          <div className="mt-3 text-center">
+            <span className="font-semibold text-neutral-900 text-base sm:text-lg group-hover:underline group-hover:text-primary-800 transition-all duration-200">
+              {title}
+            </span>
           </div>
-        ))}
-      </div>
-    );
-  }
-  
+        </div>
+      ))}
+    </div>
+  );
+}

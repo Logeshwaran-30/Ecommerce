@@ -16,14 +16,16 @@ export const CartProvider = ({ children }) => {
   });
 
   const [cartCount, setCartCount] = useState(0);
-  const cartLimit = 100; 
-
+  const cartLimit = 100;
   const [imageUrl, setImageUrl] = useState('');
+
+  // ✅ Update total cart item count
   const updateCartCount = (cart) => {
     const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
     setCartCount(totalItems);
   };
 
+  // ✅ Add product to cart
   const addToCart = useCallback(
     (product, quantity = 1) => {
       if (cartCount + quantity > cartLimit) {
@@ -45,10 +47,13 @@ export const CartProvider = ({ children }) => {
     },
     [cartCount, cartLimit]
   );
+
+  // ✅ Remove a product from cart
   const removeFromCart = useCallback((productId) => {
     setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
   }, []);
 
+  // ✅ Update product quantity
   const updateQuantity = useCallback(
     (productId, quantity) => {
       if (quantity <= 0) {
@@ -64,9 +69,9 @@ export const CartProvider = ({ children }) => {
     [removeFromCart]
   );
 
-
+  // ✅ Apply promo code
   const applyPromoCode = (code) => {
-    const validPromoCode = 'VSF2020'; 
+    const validPromoCode = 'VSF2020';
     if (promoCode) {
       alert('Promo code has already been applied!');
     } else if (code.toUpperCase() === validPromoCode) {
@@ -77,13 +82,20 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-
+  // ✅ Remove promo code
   const removePromoCode = () => {
     setPromoCode(null);
     localStorage.removeItem('promoCode');
   };
 
+  // ✅ NEW: Clear entire cart (used after order placed)
+  const clearCart = useCallback(() => {
+    setCart([]);
+    localStorage.removeItem('cart');
+    setCartCount(0);
+  }, []);
 
+  // ✅ Update cart in localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount(cart);
@@ -100,7 +112,8 @@ export const CartProvider = ({ children }) => {
         promoCode,
         applyPromoCode,
         removePromoCode,
-        imageUrl, 
+        clearCart, // ✅ Exported here
+        imageUrl,
       }}
     >
       {children}

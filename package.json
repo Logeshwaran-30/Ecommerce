@@ -12,6 +12,8 @@
   "dependencies": {
     "@salesforce/design-system-react": "^0.10.61",
     "axios": "^1.7.9",
+    "framer-motion": "^12.23.24",
+    "lucide-react": "^0.548.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-redux": "^9.1.2",

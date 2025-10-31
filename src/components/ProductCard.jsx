@@ -1,214 +1,302 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   SfButton,
-  SfRating,
-  SfCounter,
-  SfLink,
   SfIconShoppingCart,
-  SfIconCheckCircle
-} from '@storefront-ui/react';
-import { useCart } from '../CartContext'; // Import the useCart hook
+} from "@storefront-ui/react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, ChevronDown, CheckCircle } from "lucide-react";
+import { useCart } from "../CartContext";
 
 const ProductCard = () => {
-  const { category } = useParams(); // Get category from URL
+  const { category } = useParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertProductId, setAlertProductId] = useState(null);
-  const { addToCart } = useCart(); // Access addToCart function from context
-  
-  // Pagination state
+  const [alertProduct, setAlertProduct] = useState(null);
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
+
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedPrice, setSelectedPrice] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Dropdown visibility
+  const [showCategories, setShowCategories] = useState(false);
+  const [showPrices, setShowPrices] = useState(false);
+
+  // ✅ Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(6); // You can change this
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('https://fakestoreapi.com/products');
+        const response = await axios.get("https://fakestoreapi.com/products");
         setProducts(response.data);
         setLoading(false);
       } catch (err) {
-        setError('Failed to fetch products');
+        setError("Failed to fetch products");
         setLoading(false);
       }
     };
-    
     fetchProducts();
   }, []);
 
-  // Scroll to top whenever currentPage changes
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentPage]);
-
-  // Filter products by category
   const getCategoryProducts = () => {
-    if (!category) return products;
-    if (category === 'mens-clothing') return products.filter((p) => p.category === "men's clothing");
-    if (category === 'womens-clothing') return products.filter((p) => p.category === "women's clothing");
-    if (category === 'electronics') return products.filter((p) => p.category === "electronics");
-    if (category === 'jewellery') return products.filter((p) => p.category === "jewelery");
-    return [];
+    let filtered = [...products];
+
+    if (selectedCategory !== "All") {
+      filtered = filtered.filter((p) => p.category === selectedCategory);
+    }
+
+    if (selectedPrice === "Low to High") {
+      filtered.sort((a, b) => a.price - b.price);
+    } else if (selectedPrice === "High to Low") {
+      filtered.sort((a, b) => b.price - a.price);
+    }
+
+    if (searchTerm.trim() !== "") {
+      filtered = filtered.filter((p) =>
+        p.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return filtered;
   };
-
-  // Handle page change
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  // Calculate which products to display based on the current page
-  const currentProducts = getCategoryProducts().slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const totalPages = Math.ceil(getCategoryProducts().length / itemsPerPage);
 
   const handleAddToCart = (product) => {
-    addToCart(product); // Add product to cart
-    setAlertProductId(product.id); // Set product ID for alert
-    setShowAlert(true); // Show the success alert
-    setTimeout(() => setShowAlert(false), 5000); // Hide alert after 5 seconds
+    addToCart(product);
+    setAlertProduct(product);
+    setTimeout(() => setAlertProduct(null), 3000);
   };
 
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {[...Array(6)].map((_, index) => (
-          <div key={index} className="border border-neutral-200 rounded-md hover:shadow-lg max-w-[300px] animate-pulse">
-            {/* Image Placeholder */}
-            <div className="relative">
-              <div className="bg-neutral-200 rounded-md w-full h-64"></div>
-            </div>
+  if (loading) return <p>Loading...</p>;
+  if (error) return <div>{error}</div>;
 
-            {/* Content Placeholder */}
-            <div className="p-4 border-t border-neutral-200">
-              {/* Title Placeholder */}
-              <div className="bg-neutral-200 rounded w-3/4 h-4 mb-2"></div>
+  const filteredProducts = getCategoryProducts();
 
-              {/* Rating and Counter Placeholders */}
-              <div className="flex items-center pt-1">
-                <div className="bg-neutral-200 w-16 h-4 mr-2"></div>
-                <div className="bg-neutral-200 w-12 h-4"></div>
-              </div>
+  // ✅ Pagination logic
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedProducts = filteredProducts.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
-              {/* Price Placeholder */}
-              <span className="block pb-2 bg-neutral-200 w-20 h-4 mt-2"></span>
-
-              {/* Add to Cart Button Placeholder */}
-              <div className="w-full">
-                <div className="bg-neutral-200 rounded-md w-3/4 h-8"></div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+const handlePageChange = (page) => {
+  if (page >= 1 && page <= totalPages) {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" }); // ✅ Scroll to top smoothly
   }
+};
 
-  if (error) {
-    return <div>{error}</div>;
-  }
 
   return (
-    <>
-      {/* Show success alert */}
-      {showAlert && alertProductId && (
-        <div
-          role="alert"
-          className="fixed top-0 right-10 flex items-center justify-between shadow-md max-w-[600px] bg-positive-100 pr-2 pl-4 mb-2 ring-1 ring-positive-200 typography-text-sm md:typography-text-base py-1 rounded-md z-50 mt-16"
-        >
-          <SfIconCheckCircle className="mr-2 text-positive-700" />
-          <p className="py-2 mr-2">
-            Product has been added to the cart!
-            <Link
-              to={`/addtocart/${alertProductId}`} // Link to the details page
-              className="ml-2 text-blue-600 hover:text-blue-800"
-            >
-              View Details
-            </Link>
-          </p>
-        </div>
-      )}
+    <div className="min-h-screen bg-white py-10 px-6 relative">
+      <h1 className="text-4xl font-semibold text-center mb-8">Products</h1>
 
-      {/* Total number of products */}
-      <div className="mb-4 -mt-10">
-        <h1 className="text-4xl font-bold mb-10 -mt-16 ml-8">
-          Products in {category ? category.replace("-", " ") : "All Categories"}:
-        </h1>
-        <span className="font-bold text-2xl md:text-3xl">{getCategoryProducts().length} Products</span>
+      {/* ✅ Search + Dropdowns */}
+      <div className="flex flex-wrap justify-center gap-4 mb-10 relative">
+        <div className="flex items-center w-full md:w-1/2 relative">
+          <input
+            type="text"
+            placeholder="Search products..."
+            className="w-full pl-5 pr-10 py-3 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <Search className="absolute right-4 text-gray-500" size={20} />
+        </div>
+
+        {/* Category Dropdown */}
+        <motion.div
+          className="relative"
+          onMouseEnter={() => setShowCategories(true)}
+          onMouseLeave={() => setShowCategories(false)}
+        >
+          <button className="flex items-center justify-between border border-gray-300 rounded-md px-4 py-3 text-sm bg-white shadow-sm cursor-pointer hover:shadow-md min-w-[150px]">
+            <span>{selectedCategory === "All" ? "Categories" : selectedCategory}</span>
+            <ChevronDown size={18} className="text-gray-500 ml-2" />
+          </button>
+
+          <AnimatePresence>
+            {showCategories && (
+              <motion.ul
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="absolute z-10 bg-white shadow-lg border border-gray-200 rounded-md mt-2 w-full overflow-hidden"
+              >
+                {["men's clothing", "women's clothing", "electronics", "jewelery"].map((cat) => (
+                  <li
+                    key={cat}
+                    className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                      setSelectedCategory(cat);
+                      setShowCategories(false);
+                    }}
+                  >
+                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Price Dropdown */}
+        <motion.div
+          className="relative"
+          onMouseEnter={() => setShowPrices(true)}
+          onMouseLeave={() => setShowPrices(false)}
+        >
+          <button className="flex items-center justify-between border border-gray-300 rounded-md px-4 py-3 text-sm bg-white shadow-sm cursor-pointer hover:shadow-md min-w-[150px]">
+            <span>{selectedPrice === "All" ? "Prices" : selectedPrice}</span>
+            <ChevronDown size={18} className="text-gray-500 ml-2" />
+          </button>
+
+          <AnimatePresence>
+            {showPrices && (
+              <motion.ul
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="absolute z-10 bg-white shadow-lg border border-gray-200 rounded-md mt-2 w-full overflow-hidden"
+              >
+                {["Low to High", "High to Low"].map((price) => (
+                  <li
+                    key={price}
+                    className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                      setSelectedPrice(price);
+                      setShowPrices(false);
+                    }}
+                  >
+                    {price}
+                  </li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {currentProducts.map((product) => (
-          <div key={product.id} className="border border-neutral-200 rounded-md hover:shadow-lg max-w-[300px]">
-            <div className="relative">
+      {/* ✅ Product Grid with Pagination Animation */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentPage}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -30 }}
+          transition={{ duration: 0.4 }}
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-center"
+        >
+          {paginatedProducts.map((product) => (
+            <motion.div
+              key={product.id}
+              className="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-lg transition duration-300 p-5 text-center"
+              whileHover={{ scale: 1.03 }}
+            >
               <Link to={`/Productdetails/${product.id}`}>
-                <img
+                <motion.img
                   src={product.image}
                   alt={product.title}
-                  className="object-cover h-auto rounded-md aspect-square"
-                  width="250"
-                  height="250"
+                  className="w-40 h-40 mx-auto mb-4 object-contain"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ duration: 0.3 }}
                 />
               </Link>
-            </div>
-            <div className="p-4 border-t border-neutral-200">
-              <Link to={`/Productdetails/${product.id}`}>
-                <h3>{product.title}</h3>
-              </Link>
-              <p className="text-sm text-gray-500">{product.category}</p> 
-              <div className="flex items-center pt-1">
-                <SfRating size="xs" value={Math.floor(product.rating?.rate || 0)} max={5} />
-                <SfLink href="#" variant="secondary" className="pl-1 no-underline">
-                  <SfCounter size="xs">{product.rating?.count || 0}</SfCounter>
-                </SfLink>
-              </div>
-              <span className="block pb-2 font-bold typography-text-lg">${product.price}</span>
-              <div className="w-full">
-                <SfButton
-                  size="sm"
-                  slotPrefix={<SfIconShoppingCart size="sm" />}
-                  onClick={() => handleAddToCart(product)}
-                >
-                  Add to cart
-                </SfButton>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+              <h2 className="text-lg font-medium text-gray-800 mb-2 line-clamp-1">
+                {product.title}
+              </h2>
+              <p className="text-gray-500 mb-2">${product.price}</p>
+              <SfButton
+                size="sm"
+                slotPrefix={<SfIconShoppingCart size="sm" />}
+                onClick={() => handleAddToCart(product)}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-md"
+              >
+                Add to Cart
+              </SfButton>
+            </motion.div>
+          ))}
+        </motion.div>
+      </AnimatePresence>
 
-      {/* Pagination Controls */}
-      <div className="flex justify-center mt-6">
-        <button
-          onClick={() => handlePageChange(currentPage - 1)}
+      {/* ✅ Pagination Controls */}
+      <div className="flex justify-center items-center mt-10 gap-3">
+        <SfButton
           disabled={currentPage === 1}
-          className="px-4 py-2 bg-blue-500 text-white rounded-l-md"
+          onClick={() => handlePageChange(currentPage - 1)}
+          className="bg-gray-200 hover:bg-gray-300 text-gray-700"
         >
           Prev
-        </button>
-        {[...Array(totalPages)].map((_, index) => (
+        </SfButton>
+
+        {[...Array(totalPages)].map((_, i) => (
           <button
-            key={index}
-            onClick={() => handlePageChange(index + 1)}
-            className={`px-4 py-2 ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'} mx-1 rounded-md`}
+            key={i}
+            onClick={() => handlePageChange(i + 1)}
+            className={`px-4 py-2 rounded-md ${
+              currentPage === i + 1
+                ? "bg-blue-500 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
           >
-            {index + 1}
+            {i + 1}
           </button>
         ))}
-        <button
-          onClick={() => handlePageChange(currentPage + 1)}
+
+        <SfButton
           disabled={currentPage === totalPages}
-          className="px-4 py-2 bg-blue-500 text-white rounded-r-md"
+          onClick={() => handlePageChange(currentPage + 1)}
+          className="bg-gray-200 hover:bg-gray-300 text-gray-700"
         >
           Next
-        </button>
+        </SfButton>
+
+        {/* Items per page dropdown */}
+        <select
+          value={itemsPerPage}
+          onChange={(e) => {
+            setItemsPerPage(parseInt(e.target.value));
+            setCurrentPage(1);
+          }}
+          className="ml-4 border border-gray-300 rounded-md px-3 py-2"
+        >
+        </select>
       </div>
-    </>
+
+      {/* ✅ Success Notification (TOP RIGHT) */}
+      <AnimatePresence>
+        {alertProduct && (
+          <motion.div
+            initial={{ opacity: 0, x: 100, y: -20 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, x: 100, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="fixed top-6 right-6 bg-green-600 text-white p-5 rounded-lg shadow-lg flex items-center space-x-3 z-50"
+          >
+            <CheckCircle size={22} className="text-white" />
+            <div>
+              <p className="font-semibold">Product added successfully!</p>
+              <p className="text-sm opacity-90">{alertProduct.title}</p>
+            </div>
+            <SfButton
+              size="sm"
+              className="ml-3 bg-white text-green-700 hover:bg-gray-100"
+              onClick={() => navigate(`/addtocart/${alertProduct.id}`)}
+            >
+              View Details
+            </SfButton>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 

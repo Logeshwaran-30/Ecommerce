@@ -3,7 +3,7 @@ import Navbar from '../components/Navbar';
 import Breadcrumbs2 from '../components/Breadcrumbs2';
 import Footer from '../components/Footer';
 import Addtocart from '../components/Addtocart';
-import ScrollToTopButton from '../components/ScrollToTopButon';
+
 
 const Productdetails = () => {
   return (
@@ -15,7 +15,6 @@ const Productdetails = () => {
 
       {/* Flex container for Productimage and Addtocart */}
       <div className="flex justify-between items-start mt-6 ml-7 mr-7">
-        {/* Left side: Productimage */}
        
 
         {/* Right side: Addtocart */}
@@ -23,7 +22,6 @@ const Productdetails = () => {
           <Addtocart />
         </div>
       </div>
-       <ScrollToTopButton />
       {/* Footer with margin-top */}
       <Footer className="mt-12" />
     </div>
